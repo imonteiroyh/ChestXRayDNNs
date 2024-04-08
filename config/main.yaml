@@ -1,0 +1,33 @@
+hydra:
+  output_subdir: null
+  run:
+    dir: .
+
+defaults:
+  - model: model1
+  - enhancement: 
+    - default
+  - _self_
+
+base:
+  image_suffix: png
+  seed: 34
+  batch_size: 4
+  n_workers: 11
+  image_size: 256
+
+dagshub:
+  repository_name: NIH-ChestXRay
+  repository_owner: imonteiroyh
+
+reports:
+  enhancement: reports/enhancement
+
+data:
+  raw: 
+    path: data/raw
+    train_samples: data/raw/train_val_list.txt
+    test_samples: data/raw/test_list.txt 
+  interim: data/interim/example.csv
+  processed:
+    path: data/processed
