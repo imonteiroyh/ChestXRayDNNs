@@ -19,6 +19,7 @@ base:
 dagshub:
   repository_name: NIH-ChestXRay
   repository_owner: imonteiroyh
+  tracking_uri: https://dagshub.com/imonteiroyh/NIH-ChestXRay.mlflow
 
 reports:
   enhancement: reports/enhancement
