@@ -14,3 +14,4 @@ torchmetrics==1.3.2
 mlflow
 graphviz
 pytorch-lightning==2.2.1
+MedPy
