@@ -1,6 +1,8 @@
 import torch
 from medpy.metric.binary import asd
 
+from xrkit.utilities.array import handle_empty_array
+
 
 def average_surface_distance(
     predictions: torch.Tensor, targets: torch.Tensor, threshold: float = 0.5, connectivity: int = 1
@@ -22,5 +24,7 @@ def average_surface_distance(
     """
 
     predictions_, targets_ = (predictions > threshold).detach().cpu().numpy(), targets.detach().cpu().numpy()
+
+    predictions_, targets_ = handle_empty_array(predictions_), handle_empty_array(targets_)
 
     return asd(predictions_, targets_)

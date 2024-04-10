@@ -10,34 +10,12 @@ from xrkit.base import CONFIG
 
 class AutoEncoder(nn.Module):
     def __init__(self, encoder: nn.Module, decoder: nn.Module) -> None:
-        """
-        Initializes an AutoEncoder module.
-
-        Parameters:
-            encoder (nn.Module):
-                The encoder module.
-            decoder (nn.Module):
-                The decoder module.
-        """
-
         super().__init__()
 
         self.encoder = encoder
         self.decoder = decoder
 
     def forward(self, inputs: torch.Tensor) -> torch.Tensor:
-        """
-        Performs a forward pass of the AutoEncoder.
-
-        Parameters:
-            inputs (torch.Tensor):
-                The input tensor to be encoded and decoded.
-
-        Returns:
-            torch.Tensor:
-                The decoded output tensor.
-        """
-
         encoded = self.encoder(inputs)
         decoded = self.decoder(encoded)
 

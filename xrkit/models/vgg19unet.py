@@ -4,8 +4,8 @@ import pytorch_lightning as L
 import torch
 
 from xrkit.models.base import AutoEncoder, BaseModel
-from xrkit.models.densenet import DenseNet201
 from xrkit.models.unet import UNet
+from xrkit.models.vgg19 import VGG19
 from xrkit.segmentation import (
     DiceBCELoss,
     average_surface_distance,
@@ -17,11 +17,11 @@ from xrkit.segmentation import (
 # mypy: disable-error-code="misc"
 
 
-class DenseNet201UNetModel(L.LightningModule, BaseModel):
+class VGG19UNetModel(L.LightningModule, BaseModel):
     def __init__(self, n_epochs: int) -> None:
         super().__init__()
 
-        encoder = DenseNet201()
+        encoder = VGG19()
         decoder = UNet()
         network = AutoEncoder(encoder=encoder, decoder=decoder)
         criterion = DiceBCELoss()

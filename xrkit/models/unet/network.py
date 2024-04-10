@@ -5,17 +5,7 @@ from xrkit.models.unet.block import ConvBlock, DecoderBlock, EncoderBlock
 
 
 class UNet(nn.Module):
-    def __init__(self, n_inputs: int = 1, n_outputs: int = 1) -> None:
-        """
-        Initialize the UNet model.
-
-        Parameters:
-            n_inputs (int, optional):
-                Number of input channels. Defaults to 1.
-            n_outputs (int, optional):
-                Number of output channels. Defaults to 1.
-        """
-
+    def __init__(self, n_inputs: int = 1) -> None:
         super().__init__()
 
         self.encoder1 = EncoderBlock(n_inputs, 64)
@@ -30,21 +20,9 @@ class UNet(nn.Module):
         self.decoder3 = DecoderBlock(256, 128)
         self.decoder4 = DecoderBlock(128, 64)
 
-        self.outputs = nn.Conv2d(64, n_outputs, kernel_size=1, padding=0)
+        self.outputs = nn.Conv2d(64, n_inputs, kernel_size=1, padding=0)
 
     def forward(self, tensor: torch.Tensor) -> torch.Tensor:
-        """
-        Forward pass of the UNet model.
-
-        Parameters:
-            tensor (torch.Tensor):
-                Input tensor.
-
-        Returns:
-            torch.Tensor:
-                Output tensor.
-        """
-
         skip1, tensor = self.encoder1(tensor)
         skip2, tensor = self.encoder2(tensor)
         skip3, tensor = self.encoder3(tensor)
