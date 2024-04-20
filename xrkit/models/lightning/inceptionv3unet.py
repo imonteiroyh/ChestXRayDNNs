@@ -4,8 +4,8 @@ import pytorch_lightning as L
 import torch
 
 from xrkit.models.base import AutoEncoder, BaseModel
+from xrkit.models.inceptionv3 import InceptionV3
 from xrkit.models.unet import UNet
-from xrkit.models.vgg19 import VGG19
 from xrkit.segmentation import (
     DiceBCELoss,
     average_surface_distance,
@@ -17,12 +17,12 @@ from xrkit.segmentation import (
 # mypy: disable-error-code="misc"
 
 
-class VGG19UNetModel(L.LightningModule, BaseModel):
-    def __init__(self, n_epochs: int) -> None:
+class InceptionV3UNetModel(L.LightningModule, BaseModel):
+    def __init__(self, n_epochs: int, n_inputs: int = 1, n_outputs: int = 1) -> None:
         super().__init__()
 
-        encoder = VGG19()
-        decoder = UNet()
+        encoder = InceptionV3(task="segmentation", n_inputs=n_inputs, n_outputs=n_outputs)
+        decoder = UNet(n_inputs=n_inputs, n_outputs=n_outputs)
         network = AutoEncoder(encoder=encoder, decoder=decoder)
         criterion = DiceBCELoss()
         metrics: Iterable[Tuple[Callable, Dict[str, Any]]] = (

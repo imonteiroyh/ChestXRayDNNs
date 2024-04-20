@@ -18,11 +18,11 @@ from xrkit.segmentation import (
 
 
 class DenseNet201UNetModel(L.LightningModule, BaseModel):
-    def __init__(self, n_epochs: int) -> None:
+    def __init__(self, n_epochs: int, n_outputs: int = 1) -> None:
         super().__init__()
 
-        encoder = DenseNet201()
-        decoder = UNet()
+        encoder = DenseNet201(task="segmentation", n_outputs=n_outputs)
+        decoder = UNet(n_outputs=n_outputs)
         network = AutoEncoder(encoder=encoder, decoder=decoder)
         criterion = DiceBCELoss()
         metrics: Iterable[Tuple[Callable, Dict[str, Any]]] = (

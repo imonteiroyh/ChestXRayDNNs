@@ -4,21 +4,26 @@ from torchvision import models
 
 from xrkit.utilities.tensor import resize_4d_tensor
 
+# mypy: disable-error-code="misc"
+
 
 class DenseNet201(nn.Module):
-    def __init__(self, n_inputs: int = 1):
+    def __init__(self, task: str, n_outputs: int = 1, pretrained: bool = False):
         super().__init__()
 
-        self.n_inputs = n_inputs
+        self.task = task
+        self.n_outputs = n_outputs
         self.network = models.densenet201()
-        self.network.features[0] = nn.Conv2d(n_inputs, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        self.network = nn.Sequential(*list(self.network.children())[:-1])
+
+        if self.task == "segmentation":
+            self.network = nn.Sequential(*list(self.network.children())[:-1])
 
     def forward(self, tensor: torch.Tensor) -> torch.Tensor:
-        original_sizes = tensor.size(2), tensor.size(3)
-
+        original_sizes = tensor.size(1), tensor.size(2), tensor.size(3)
+    
         tensor = self.network(tensor)
-
-        tensor = resize_4d_tensor(tensor, size=(self.n_inputs, *original_sizes))
-
+        
+        if self.task == 'segmentation':
+            tensor = resize_4d_tensor(tensor, size=(*original_sizes,))
+    
         return tensor

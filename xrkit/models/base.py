@@ -2,6 +2,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
+from torchinfo import summary
 
 from xrkit.base import CONFIG
 
@@ -114,13 +115,17 @@ class BaseModel:
             self.logger.experiment.log_param(
                 self.logger.run_id, "criterion", self.criterion.__class__.__name__
             )
+
             self.logger.experiment.log_param(self.logger.run_id, "batch_size", CONFIG.base.batch_size)
+
             self.logger.experiment.log_param(
                 self.logger.run_id, "optimizer", self.optimizer.__class__.__name__
             )
+
             self.logger.experiment.log_param(
                 self.logger.run_id, "scheduler", self.scheduler.__class__.__name__
             )
+
             self.logger.experiment.log_param(
                 self.logger.run_id, "activaction_function", self.activaction_function.__name__
             )
@@ -133,7 +138,17 @@ class BaseModel:
                 metrics += "\n\n"
             self.logger.experiment.log_text(self.logger.run_id, metrics, "metrics.txt")
 
-            self.logger.experiment.log_text(self.logger.run_id, str(self.network), "summary.txt")
+            self.logger.experiment.log_text(self.logger.run_id, str(self.network), "architecture.txt")
+
+            self.logger.experiment.log_text(
+                self.logger.run_id,
+                summary(
+                    self.network,
+                    input_size=(CONFIG.base.batch_size, 1, CONFIG.base.image_size, CONFIG.base.image_size),
+                ),
+                "summary.txt",
+            )
+
         except AttributeError:
             pass
 

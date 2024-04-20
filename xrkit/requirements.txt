@@ -16,3 +16,4 @@ graphviz
 pytorch-lightning==2.2.1
 MedPy
 timm
+torchinfo

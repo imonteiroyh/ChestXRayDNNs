@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 import torchvision
 from PIL import Image
+from PIL.Image import Image as ImageType
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset
 
@@ -40,7 +41,7 @@ class SegmentationDataset(Dataset):
 
     def __getitem__(
         self, index: int, transform: bool = True
-    ) -> Tuple[torch.Tensor, torch.Tensor] | Tuple[Image, Image]:
+    ) -> Tuple[torch.Tensor, torch.Tensor] | Tuple[ImageType, ImageType]:
         """
         Retrieves a sample from the dataset.
 
@@ -51,7 +52,7 @@ class SegmentationDataset(Dataset):
                 Whether to apply transformations to the data. Defaults to True.
 
         Returns:
-            Tuple[torch.Tensor, torch.Tensor]:
+            Tuple[torch.Tensor, torch.Tensor] | Tuple[ImageType, ImageType]:
                 Tuple containing the image and its corresponding mask.
         """
 
@@ -59,7 +60,7 @@ class SegmentationDataset(Dataset):
         top_left_x, top_left_y, width, height = (
             self.set_info.iloc[index][["Bbox [x", "y", "w", "h]"]].astype(int).values
         )
-        image = Image.open(next(Path(CONFIG.data.raw.path).rglob(image_path)).as_posix()).convert("L")
+        image = Image.open(next(Path(CONFIG.data.raw.path).rglob(image_path)).as_posix()).convert("RGB")
 
         image_shape = image.size[::-1]
         mask = np.zeros(image_shape, dtype=np.uint8)

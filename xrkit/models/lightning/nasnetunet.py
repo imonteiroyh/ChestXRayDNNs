@@ -4,7 +4,7 @@ import pytorch_lightning as L
 import torch
 
 from xrkit.models.base import AutoEncoder, BaseModel
-from xrkit.models.resnet import ResNet152V2
+from xrkit.models.nasnet import NASNetLarge
 from xrkit.models.unet import UNet
 from xrkit.segmentation import (
     DiceBCELoss,
@@ -17,12 +17,12 @@ from xrkit.segmentation import (
 # mypy: disable-error-code="misc"
 
 
-class ResNet152V2UNetModel(L.LightningModule, BaseModel):
-    def __init__(self, n_epochs: int) -> None:
+class NASNetLargeUNetModel(L.LightningModule, BaseModel):
+    def __init__(self, n_epochs: int, n_inputs: int = 1, n_outputs: int = 1) -> None:
         super().__init__()
 
-        encoder = ResNet152V2()
-        decoder = UNet()
+        encoder = NASNetLarge(task="segmentation", n_inputs=n_inputs, n_outputs=n_outputs)
+        decoder = UNet(n_inputs=n_inputs, n_outputs=n_outputs)
         network = AutoEncoder(encoder=encoder, decoder=decoder)
         criterion = DiceBCELoss()
         metrics: Iterable[Tuple[Callable, Dict[str, Any]]] = (
