@@ -9,8 +9,10 @@ help:			## Show the help.
 .PHONY: clean
 clean:			## Clean unused files.
 	@echo "Cleaning up..."
-	@find . -name "*.pyc" -delete
-	@find . -name "__pycache__" -delete
+	@find . -name "*.egg-info" -exec rm -rf {} +
+	@find . -name "*.ipynb_checkpoints" -exec rm -rf {} +
+	@find . -name "*.pyc" -exec rm -rf {} +
+	@find . -name "__pycache__" -exec rm -rf {} +
 	@rm -f .coverage
 	@rm -rf .mypy_cache
 	@rm -rf .pytest_cache
@@ -27,21 +29,14 @@ install:		## Install in development mode.
 
 .PHONY: format
 format:			## Format code using isort and black
-	isort notebooks/
-	isort scripts/
-	isort xrkit/
-	isort tests/
-	black -l 110 notebooks/
-	black -l 110 scripts/
-	black -l 110 xrkit/
-	black -l 110 tests/
+	isort .
+	black -l 110 .
 
 
 .PHONY: lint
 lint:			## Run linters
 	flake8 xrkit/
-	black -l 110 --check xrkit/
-	black -l 110 --check tests/
+	black -l 110 --check .
 	mypy xrkit/
 
 

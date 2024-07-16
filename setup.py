@@ -22,12 +22,13 @@ def read_requirements(path: str) -> list[str]:
 
     return requirements
 
+
 setup(
     name="xrkit",
     author="Vandemberg Monteiro",
     description="A set of useful tools to deal with different project needs.",
     classifiers=[
-        'License :: OSI Approved :: MIT License',
+        "License :: OSI Approved :: MIT License",
     ],
     packages=find_packages(exclude=["tests", ".github"]),
     install_requires=read_requirements("xrkit/requirements.txt"),

@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 
 from xrkit.models.densenet import DenseNet201
-from xrkit.models.nasnet import NASNetLarge
-from xrkit.models.resnet import ResNet152V2
+from xrkit.models.nasnetlarge import NASNetLarge
+from xrkit.models.resnet152v2 import ResNet152V2
 from xrkit.models.unet import UNet
 from xrkit.models.vgg19 import VGG19
 

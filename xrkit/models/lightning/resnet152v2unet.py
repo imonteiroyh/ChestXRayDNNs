@@ -4,7 +4,7 @@ import pytorch_lightning as L
 import torch
 
 from xrkit.models.base import AutoEncoder, BaseModel
-from xrkit.models.resnet import ResNet152V2
+from xrkit.models.resnet152v2 import ResNet152V2
 from xrkit.models.unet import UNet
 from xrkit.segmentation import (
     DiceBCELoss,
@@ -27,7 +27,7 @@ class ResNet152V2UNetModel(L.LightningModule, BaseModel):
         criterion = DiceBCELoss()
         metrics: Iterable[Tuple[Callable, Dict[str, Any]]] = (
             (dice, {}),
-            (jaccard_index, {"average": "weighted"}),
+            (jaccard_index, {"average": "macro"}),
             (balanced_average_hausdorff_distance, {}),
             (average_surface_distance, {}),
         )

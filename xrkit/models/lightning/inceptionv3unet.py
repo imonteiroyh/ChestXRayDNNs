@@ -4,7 +4,7 @@ import pytorch_lightning as L
 import torch
 
 from xrkit.models.base import AutoEncoder, BaseModel
-from xrkit.models.densenet import DenseNet201
+from xrkit.models.inceptionv3 import InceptionV3
 from xrkit.models.unet import UNet
 from xrkit.segmentation import (
     DiceBCELoss,
@@ -17,17 +17,17 @@ from xrkit.segmentation import (
 # mypy: disable-error-code="misc"
 
 
-class DenseNet201UNetModel(L.LightningModule, BaseModel):
+class InceptionV3UNetModel(L.LightningModule, BaseModel):
     def __init__(self, n_epochs: int) -> None:
         super().__init__()
 
-        encoder = DenseNet201()
+        encoder = InceptionV3()
         decoder = UNet()
         network = AutoEncoder(encoder=encoder, decoder=decoder)
         criterion = DiceBCELoss()
         metrics: Iterable[Tuple[Callable, Dict[str, Any]]] = (
             (dice, {}),
-            (jaccard_index, {"average": "weighted"}),
+            (jaccard_index, {"average": "macro"}),
             (balanced_average_hausdorff_distance, {}),
             (average_surface_distance, {}),
         )
@@ -44,3 +44,10 @@ class DenseNet201UNetModel(L.LightningModule, BaseModel):
             optimizer=optimizer,
             scheduler=scheduler,
         )
+
+
+if __name__ == "__main__":
+    input = torch.rand((4, 1, 256, 256))
+
+    model = InceptionV3UNetModel(n_epochs=1).network
+    print(model(input).shape)

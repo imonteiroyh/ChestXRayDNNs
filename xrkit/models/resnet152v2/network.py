@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from xrkit.models.resnet.block import Bottleneck
+from xrkit.models.resnet152v2.block import Bottleneck
 from xrkit.utilities.tensor import resize_4d_tensor
 
 

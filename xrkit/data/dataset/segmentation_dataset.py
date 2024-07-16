@@ -11,6 +11,8 @@ from torch.utils.data import Dataset
 
 from xrkit.base import CONFIG
 
+# mypy: disable-error-code="valid-type"
+
 
 class SegmentationDataset(Dataset):
     def __init__(self, data_subset: str) -> None:
