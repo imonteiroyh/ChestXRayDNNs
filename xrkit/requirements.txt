@@ -7,6 +7,7 @@ scikit-image
 scipy
 typer
 torch==2.2.2
+torchinfo
 torchvision
 tqdm
 dagshub

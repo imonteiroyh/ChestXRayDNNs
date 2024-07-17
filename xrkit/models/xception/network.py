@@ -6,7 +6,7 @@ from xrkit.utilities.tensor import resize_4d_tensor
 
 
 class Xception(nn.Module):
-    def __init__(self, n_inputs: int = 1, pretrained=False):
+    def __init__(self, n_inputs: int = 3, pretrained=False):
 
         super().__init__()
 
@@ -26,7 +26,7 @@ class Xception(nn.Module):
 
 
 if __name__ == "__main__":
-    input = torch.rand((4, 1, 256, 256))
+    input = torch.rand((4, 3, 256, 256))
     output = Xception()(input)
 
     print(output.shape)

@@ -6,7 +6,7 @@ from xrkit.utilities.tensor import resize_4d_tensor
 
 
 class InceptionV3(nn.Module):
-    def __init__(self, n_inputs: int = 1, pretrained=False):
+    def __init__(self, n_inputs: int = 3, pretrained=False):
 
         super().__init__()
 
@@ -26,7 +26,7 @@ class InceptionV3(nn.Module):
 
 
 if __name__ == "__main__":
-    input = torch.rand((4, 1, 256, 256))
+    input = torch.rand((4, 3, 256, 256))
     output = InceptionV3()(input)
 
     print(output.shape)

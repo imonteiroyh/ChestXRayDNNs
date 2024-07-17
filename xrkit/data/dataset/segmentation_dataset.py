@@ -68,9 +68,8 @@ class SegmentationDataset(Dataset):
         mask[top_left_y : top_left_y + height, top_left_x : top_left_x + width] = 255.0
         mask = Image.fromarray(mask).convert("L")
 
-        if transform:
-            image = self.transform(image)
-            mask = self.transform(mask)
+        image = self.transform(image)
+        mask = self.transform(mask)
 
         return image, mask
 
@@ -100,3 +99,8 @@ class SegmentationDataset(Dataset):
             return data_mapping[self.data_subset]
         else:
             raise ValueError("Invalid data type. Choose from 'train' or 'test'.")
+
+
+if __name__ == "__main__":
+    dataset = SegmentationDataset(data_subset="train")
+    dataset.__getitem__(0)

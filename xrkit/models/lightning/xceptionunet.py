@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 import pytorch_lightning as L
 import torch
 
-from xrkit.models.base import AutoEncoder, BaseModel
+from xrkit.models.lightning.base import AutoEncoder, BaseModel
 from xrkit.models.unet import UNet
 from xrkit.models.xception import Xception
 from xrkit.segmentation import (
@@ -47,7 +47,7 @@ class XceptionUNetModel(L.LightningModule, BaseModel):
 
 
 if __name__ == "__main__":
-    input = torch.rand((4, 1, 256, 256))
+    input = torch.rand((4, 3, 256, 256))
 
     model = XceptionUNetModel(n_epochs=1).network
     print(model(input).shape)

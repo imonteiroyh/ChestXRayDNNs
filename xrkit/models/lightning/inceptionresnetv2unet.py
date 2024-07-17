@@ -3,8 +3,8 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 import pytorch_lightning as L
 import torch
 
-from xrkit.models.base import AutoEncoder, BaseModel
 from xrkit.models.inceptionresnetv2 import InceptionResNetV2
+from xrkit.models.lightning.base import AutoEncoder, BaseModel
 from xrkit.models.unet import UNet
 from xrkit.segmentation import (
     DiceBCELoss,
@@ -47,7 +47,7 @@ class InceptionResNetV2UNetModel(L.LightningModule, BaseModel):
 
 
 if __name__ == "__main__":
-    input = torch.rand((4, 1, 256, 256))
+    input = torch.rand((4, 3, 256, 256))
 
     model = InceptionResNetV2UNetModel(n_epochs=1).network
     print(model(input).shape)

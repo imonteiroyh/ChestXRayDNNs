@@ -6,7 +6,7 @@ from xrkit.utilities.tensor import resize_4d_tensor
 
 
 class VGG19(nn.Module):
-    def __init__(self, n_inputs: int = 1):
+    def __init__(self, n_inputs: int = 3):
 
         super().__init__()
 

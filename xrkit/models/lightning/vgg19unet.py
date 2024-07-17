@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 import pytorch_lightning as L
 import torch
 
-from xrkit.models.base import AutoEncoder, BaseModel
+from xrkit.models.lightning.base import AutoEncoder, BaseModel
 from xrkit.models.unet import UNet
 from xrkit.models.vgg19 import VGG19
 from xrkit.segmentation import (

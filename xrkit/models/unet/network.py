@@ -5,7 +5,7 @@ from xrkit.models.unet.block import ConvBlock, DecoderBlock, EncoderBlock
 
 
 class UNet(nn.Module):
-    def __init__(self, n_inputs: int = 1) -> None:
+    def __init__(self, n_inputs: int = 3) -> None:
         super().__init__()
 
         self.encoder1 = EncoderBlock(n_inputs, 64)

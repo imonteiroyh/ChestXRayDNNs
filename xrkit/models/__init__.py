@@ -1,5 +1,6 @@
 from xrkit.models.lightning.densenet201unet import DenseNet201UNetModel
 from xrkit.models.lightning.inceptionv3unet import InceptionV3UNetModel
+from xrkit.models.lightning.mobilenetv2unet import MobileNetV2UNetModel
 from xrkit.models.lightning.nasnetlargeunet import NASNetLargeUNetModel
 from xrkit.models.lightning.resnet152v2unet import ResNet152V2UNetModel
 from xrkit.models.lightning.vgg19unet import VGG19UNetModel
@@ -12,4 +13,5 @@ __all__ = [
     "VGG19UNetModel",
     "XceptionUNetModel",
     "InceptionV3UNetModel",
+    "MobileNetV2UNetModel",
 ]

@@ -6,7 +6,7 @@ from xrkit.utilities.tensor import resize_4d_tensor
 
 
 class NASNetLarge(nn.Module):
-    def __init__(self, n_inputs: int = 1, pretrained=False):
+    def __init__(self, n_inputs: int = 3, pretrained=False):
 
         super().__init__()
 
