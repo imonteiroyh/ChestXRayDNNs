@@ -1,3 +1,3 @@
-from xrkit.data.dataset.segmentation_dataset import SegmentationDataset
+from xrkit.data.dataset.rsua_segmentation_dataset import RSUASegmentationDataset
 
-__all__ = ["SegmentationDataset"]
+__all__ = ["RSUASegmentationDataset"]

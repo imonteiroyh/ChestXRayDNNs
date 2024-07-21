@@ -1,45 +1,35 @@
 import torch
 
 
-def dice(predictions: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+def dice(predictions: torch.Tensor, targets: torch.Tensor, threshold: float = 0.5) -> torch.Tensor:
     """
-    Computes the Dice score metric for a batch of predictions.
+    Calculates the Dice score metric for a batch of predictions.
 
     Parameters:
         predictions (torch.Tensor):
-            The predicted segmentation masks. Expected to be in one-hot format with the first dimension
-            representing the batch size. The values should be binarized. Example shape: [batch_size,
-            num_classes, height, width].
+            The predicted tensor.
         targets (torch.Tensor):
-            The ground truth segmentation masks. Expected to be in one-hot format with the first dimension
-            representing the batch size. The values should be binarized. Example shape: [batch_size,
-            num_classes, height, width].
+            The target tensor.
+        threshold (float):
+            The threshold above which predictions are considered positive. Defaults to 0.5.
 
     Returns:
         torch.Tensor:
-            The Dice scores per batch and per class. The shape is [batch_size, num_classes].
-
-    Raises:
-        ValueError:
-            If the shapes of `predictions` and `targets` are not the same.
+            The Dice score value.
     """
 
-    targets_ = targets.float()
-    predictions_ = predictions.float()
+    predictions_, targets_ = predictions.view(predictions.size(0), -1), targets.view(targets.size(0), -1)
 
-    if targets_.shape != predictions_.shape:
-        raise ValueError(
-            f"y_pred and y should have same shapes, got {predictions_.shape} and {targets_.shape}."
-        )
+    y_pred_positive = torch.round((predictions_ > threshold).int())
+    y_pred_negative = 1 - y_pred_positive
 
-    n_dims = len(predictions_.shape)
-    reduce_axes = list(range(2, n_dims))
-    intersection = torch.sum(targets_ * predictions_, dim=reduce_axes)
+    y_positive = torch.round(torch.clip(targets_, 0, 1))
+    y_negative = 1 - y_positive
 
-    targets_sum = torch.sum(targets_, reduce_axes)
-    predictions_sum = torch.sum(predictions_, dim=reduce_axes)
-    denominator = targets_sum + predictions_sum
+    TP = (y_positive * y_pred_positive).sum(dim=1)
+    _ = (y_negative * y_pred_negative).sum(dim=1)
 
-    return torch.where(
-        denominator > 0, (2.0 * intersection) / denominator, torch.tensor(1.0, device=targets_sum.device)
-    ).mean()
+    FP = (y_negative * y_pred_positive).sum(dim=1)
+    FN = (y_positive * y_pred_negative).sum(dim=1)
+
+    return ((2 * TP) / (2 * TP + FP + FN)).mean()

@@ -19,54 +19,90 @@ class MobileNetV2UNet(nn.Module):
         self.network[0][4].conv[0].register_forward_hook(self.get_features("64"))
         self.network[0][7].conv[0].register_forward_hook(self.get_features("32"))
         self.network[0][14].conv[0].register_forward_hook(self.get_features("16"))
-        self.feature_order = ["16", "32", "64", "128"]
 
         self.upsample = nn.Upsample(scale_factor=2, mode="bilinear")
-        self.conv = nn.Conv2d(32, 1, kernel_size=1, padding="same")
+        self.relu = nn.ReLU()
 
-        self.make_layers()
+        self.conv1_1 = nn.Conv2d(1856, 256, kernel_size=3, padding="same")
+        self.bn1_1 = nn.BatchNorm2d(256)
+        self.conv1_2 = nn.Conv2d(256, 256, kernel_size=3, padding="same")
+        self.bn1_2 = nn.BatchNorm2d(256)
 
-    def make_layers(self, in_channels=[1856, 448, 272, 160], out_channels=[256, 128, 64, 32]):
-        if len(in_channels) != len(out_channels):
-            raise ValueError("in_channels and out_channels must have the same length.")
+        self.conv2_1 = nn.Conv2d(448, 128, kernel_size=3, padding="same")
+        self.bn2_1 = nn.BatchNorm2d(128)
+        self.conv2_2 = nn.Conv2d(128, 128, kernel_size=3, padding="same")
+        self.bn2_2 = nn.BatchNorm2d(128)
 
-        self.blocks = []
-        for index in range(len(in_channels)):
-            block = nn.Sequential(
-                nn.Conv2d(in_channels[index], out_channels[index], kernel_size=3, padding="same"),
-                nn.BatchNorm2d(out_channels[index]),
-                nn.ReLU(),
-                nn.Conv2d(out_channels[index], out_channels[index], kernel_size=3, padding="same"),
-                nn.BatchNorm2d(out_channels[index]),
-                nn.ReLU(),
-            ).to(self.device)
+        self.conv3_1 = nn.Conv2d(272, 64, kernel_size=3, padding="same")
+        self.bn3_1 = nn.BatchNorm2d(64)
+        self.conv3_2 = nn.Conv2d(64, 64, kernel_size=3, padding="same")
+        self.bn3_2 = nn.BatchNorm2d(64)
 
-            self.blocks.append(block)
+        self.conv4_1 = nn.Conv2d(160, 32, kernel_size=3, padding="same")
+        self.bn4_1 = nn.BatchNorm2d(32)
+        self.conv4_2 = nn.Conv2d(32, 32, kernel_size=3, padding="same")
+        self.bn4_2 = nn.BatchNorm2d(32)
+
+        self.conv5 = nn.Conv2d(32, 1, kernel_size=1, padding="same")
 
     def forward(self, tensor: torch.Tensor) -> torch.Tensor:
 
         tensor = self.network(tensor)
 
-        # print([i.shape for i in self.features.values()])
-        for index, block in enumerate(self.blocks):
-            tensor = self.upsample(tensor)
-            tensor = torch.cat([tensor, self.features[self.feature_order[index]]], dim=1)
-            tensor = block(tensor)
+        tensor = self.upsample(tensor)
+        tensor = torch.cat([tensor, self.features["16"]], dim=1)
+
+        tensor = self.conv1_1(tensor)
+        tensor = self.bn1_1(tensor)
+        tensor = self.relu(tensor)
+        tensor = self.conv1_2(tensor)
+        tensor = self.bn1_2(tensor)
+        tensor = self.relu(tensor)
 
         tensor = self.upsample(tensor)
-        tensor = self.conv(tensor)
+        tensor = torch.cat([tensor, self.features["32"]], dim=1)
+
+        tensor = self.conv2_1(tensor)
+        tensor = self.bn2_1(tensor)
+        tensor = self.relu(tensor)
+        tensor = self.conv2_2(tensor)
+        tensor = self.bn2_2(tensor)
+        tensor = self.relu(tensor)
+
+        tensor = self.upsample(tensor)
+        tensor = torch.cat([tensor, self.features["64"]], dim=1)
+
+        tensor = self.conv3_1(tensor)
+        tensor = self.bn3_1(tensor)
+        tensor = self.relu(tensor)
+        tensor = self.conv3_2(tensor)
+        tensor = self.bn3_2(tensor)
+        tensor = self.relu(tensor)
+
+        tensor = self.upsample(tensor)
+        tensor = torch.cat([tensor, self.features["128"]], dim=1)
+
+        tensor = self.conv4_1(tensor)
+        tensor = self.bn4_1(tensor)
+        tensor = self.relu(tensor)
+        tensor = self.conv4_2(tensor)
+        tensor = self.bn4_2(tensor)
+        tensor = self.relu(tensor)
+
+        tensor = self.upsample(tensor)
+        tensor = self.conv5(tensor)
 
         return tensor
 
     def get_features(self, name):
-        def hook(model, input, output):
+        def hook(_, __, output):
             self.features[name] = output
 
         return hook
 
 
 if __name__ == "__main__":
-    input_size = (4, 3, 256, 256)
+    input_size = (4, 1, 256, 256)
     input = torch.rand(input_size)
     model = MobileNetV2UNet(device="cpu")
 

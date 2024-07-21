@@ -25,6 +25,10 @@ reports:
   enhancement: reports/enhancement
 
 data:
+  montgomery_segmentation:
+    raw_path: data/raw/MontgomerySet
+  rsua_segmentation:
+    raw_path: "data/raw/Data Thorax DICOM RSUA (Validated)"
   raw: 
     path: data/raw
     train_samples: data/raw/train_val_list.txt
