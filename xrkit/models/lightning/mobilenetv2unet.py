@@ -44,7 +44,7 @@ class MobileNetV2UNetModel(L.LightningModule, BaseModel):
 
 
 if __name__ == "__main__":
-    input = torch.rand((4, 3, 256, 256))
+    input = torch.rand((4, 1, 256, 256))
 
     model = MobileNetV2UNetModel(n_epochs=1, device="cpu").network
     print(model(input).shape)
