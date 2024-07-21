@@ -46,7 +46,7 @@ class InceptionResNetV2UNet(nn.Module):
 
         self.conv5 = nn.Conv2d(32, 1, kernel_size=1, padding="same")
 
-    def forward(self, tensor: torch.Tensor) -> torch.Tensor:
+    def forward(self, tensor):
         tensor = self.network(tensor)
 
         tensor = F.interpolate(tensor, size=(14, 14))
@@ -94,9 +94,9 @@ class InceptionResNetV2UNet(nn.Module):
 
         return tensor
 
-    def get_features(self, name):
+    def get_features(self, id):
         def hook(_, __, output):
-            self.features[name] = output
+            self.features[id] = output
 
         return hook
 
