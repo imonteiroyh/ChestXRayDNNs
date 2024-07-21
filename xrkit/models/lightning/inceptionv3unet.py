@@ -3,9 +3,8 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 import pytorch_lightning as L
 import torch
 
-from xrkit.models.inceptionv3 import InceptionV3
-from xrkit.models.lightning.base import AutoEncoder, BaseModel
-from xrkit.models.unet import UNet
+from xrkit.models.inceptionv3unet import InceptionV3UNet
+from xrkit.models.lightning.base import BaseModel
 from xrkit.segmentation import (
     DiceBCELoss,
     average_surface_distance,
@@ -18,16 +17,14 @@ from xrkit.segmentation import (
 
 
 class InceptionV3UNetModel(L.LightningModule, BaseModel):
-    def __init__(self, n_epochs: int) -> None:
+    def __init__(self, n_epochs: int, **kwargs) -> None:
         super().__init__()
 
-        encoder = InceptionV3()
-        decoder = UNet()
-        network = AutoEncoder(encoder=encoder, decoder=decoder)
+        network = InceptionV3UNet(n_inputs=1, **kwargs)
         criterion = DiceBCELoss()
         metrics: Iterable[Tuple[Callable, Dict[str, Any]]] = (
             (dice, {}),
-            (jaccard_index, {"average": "macro"}),
+            (jaccard_index, {}),
             (balanced_average_hausdorff_distance, {}),
             (average_surface_distance, {}),
         )
@@ -47,8 +44,7 @@ class InceptionV3UNetModel(L.LightningModule, BaseModel):
 
 
 if __name__ == "__main__":
-    input = torch.rand((4, 3, 256, 256))
+    input = torch.rand((4, 1, 256, 256))
 
-    model = InceptionV3UNetModel(n_epochs=1).network
-    breakpoint()
+    model = InceptionV3UNetModel(n_epochs=1, device="cpu").network
     print(model(input).shape)

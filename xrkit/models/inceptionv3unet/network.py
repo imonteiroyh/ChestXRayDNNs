@@ -5,30 +5,30 @@ import torch.nn.functional as F
 from torchinfo import summary
 
 
-class InceptionResNetV2UNet(nn.Module):
+class InceptionV3UNet(nn.Module):
     def __init__(self, n_inputs=1, device="cuda"):
         super().__init__()
 
         self.features = {}
         self.device = device
 
-        self.network = timm.create_model("inception_resnet_v2")
-        self.network.conv2d_1a.conv = nn.Conv2d(n_inputs, 32, kernel_size=3, stride=2, bias=False)
+        self.network = timm.create_model("inception_v3")
+        self.network.Conv2d_1a_3x3.conv = nn.Conv2d(n_inputs, 32, kernel_size=3, stride=2, bias=False)
         self.network = nn.Sequential(*list(self.network.children()))[:-3]
 
         self.network[2].register_forward_hook(self.get_features(3))
         self.network[5].register_forward_hook(self.get_features(2))
-        self.network[8].register_forward_hook(self.get_features(1))
-        self.network[10].register_forward_hook(self.get_features(0))
+        self.network[10].branch3x3dbl_2.register_forward_hook(self.get_features(1))
+        self.network[15].branch7x7x3_3.register_forward_hook(self.get_features(0))
 
         self.relu = nn.ReLU()
 
-        self.conv1_1 = nn.Conv2d(2624, 256, kernel_size=3, padding="same")
+        self.conv1_1 = nn.Conv2d(2240, 256, kernel_size=3, padding="same")
         self.bn1_1 = nn.BatchNorm2d(256)
         self.conv1_2 = nn.Conv2d(256, 256, kernel_size=3, padding="same")
         self.bn1_2 = nn.BatchNorm2d(256)
 
-        self.conv2_1 = nn.Conv2d(576, 128, kernel_size=3, padding="same")
+        self.conv2_1 = nn.Conv2d(352, 128, kernel_size=3, padding="same")
         self.bn2_1 = nn.BatchNorm2d(128)
         self.conv2_2 = nn.Conv2d(128, 128, kernel_size=3, padding="same")
         self.bn2_2 = nn.BatchNorm2d(128)
@@ -45,7 +45,8 @@ class InceptionResNetV2UNet(nn.Module):
 
         self.conv5 = nn.Conv2d(32, 1, kernel_size=1, padding="same")
 
-    def forward(self, tensor):
+    def forward(self, tensor: torch.Tensor) -> torch.Tensor:
+
         tensor = self.network(tensor)
 
         tensor = F.interpolate(tensor, size=(14, 14))
@@ -103,7 +104,7 @@ class InceptionResNetV2UNet(nn.Module):
 if __name__ == "__main__":
     input_size = (4, 1, 256, 256)
     input = torch.rand(input_size)
-    model = InceptionResNetV2UNet(device="cpu")
+    model = InceptionV3UNet(device="cpu")
 
     print(model)
 
