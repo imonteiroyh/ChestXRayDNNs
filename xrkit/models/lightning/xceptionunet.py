@@ -3,9 +3,8 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 import pytorch_lightning as L
 import torch
 
-from xrkit.models.lightning.base import AutoEncoder, BaseModel
-from xrkit.models.unet import UNet
-from xrkit.models.xception import Xception
+from xrkit.models.lightning.base import BaseModel
+from xrkit.models.xceptionunet import XceptionUNet
 from xrkit.segmentation import (
     DiceBCELoss,
     average_surface_distance,
@@ -18,16 +17,14 @@ from xrkit.segmentation import (
 
 
 class XceptionUNetModel(L.LightningModule, BaseModel):
-    def __init__(self, n_epochs: int) -> None:
+    def __init__(self, n_epochs: int, **kwargs) -> None:
         super().__init__()
 
-        encoder = Xception()
-        decoder = UNet()
-        network = AutoEncoder(encoder=encoder, decoder=decoder)
+        network = XceptionUNet(n_inputs=1, **kwargs)
         criterion = DiceBCELoss()
         metrics: Iterable[Tuple[Callable, Dict[str, Any]]] = (
             (dice, {}),
-            (jaccard_index, {"average": "macro"}),
+            (jaccard_index, {}),
             (balanced_average_hausdorff_distance, {}),
             (average_surface_distance, {}),
         )
@@ -47,7 +44,7 @@ class XceptionUNetModel(L.LightningModule, BaseModel):
 
 
 if __name__ == "__main__":
-    input = torch.rand((4, 3, 256, 256))
+    input = torch.rand((4, 1, 256, 256))
 
-    model = XceptionUNetModel(n_epochs=1).network
+    model = XceptionUNetModel(n_epochs=1, device="cpu").network
     print(model(input).shape)

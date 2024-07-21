@@ -7,9 +7,9 @@ from xrkit.models.densenet import DenseNet201
 from xrkit.models.nasnetlarge import NASNetLarge
 from xrkit.models.resnet152v2 import ResNet152V2
 from xrkit.models.unet import UNet
-from xrkit.models.vgg19 import VGG19
+from xrkit.models.vgg19 import VGG19UNet
 
-models = [DenseNet201, NASNetLarge, ResNet152V2, UNet, VGG19]
+models = [DenseNet201, NASNetLarge, ResNet152V2, UNet, VGG19UNet]
 
 
 class ModelTest(unittest.TestCase):

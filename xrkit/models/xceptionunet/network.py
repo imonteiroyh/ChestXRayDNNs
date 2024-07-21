@@ -1,34 +1,34 @@
+import timm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torchinfo import summary
-from torchvision import models
 
 
-class VGG19UNet(nn.Module):
+class XceptionUNet(nn.Module):
     def __init__(self, n_inputs=1, device="cuda"):
         super().__init__()
 
         self.features = {}
         self.device = device
 
-        self.network = models.vgg19()
-        self.network.features[0] = nn.Conv2d(n_inputs, 64, kernel_size=3, stride=1, padding=1)
+        self.network = timm.create_model("legacy_xception")
+        self.network.conv1 = nn.Conv2d(n_inputs, 32, kernel_size=3, stride=2, bias=False)
         self.network = nn.Sequential(*list(self.network.children()))[:-2]
 
-        self.network[0][8].register_forward_hook(self.get_features(3))
-        self.network[0][17].register_forward_hook(self.get_features(2))
-        self.network[0][26].register_forward_hook(self.get_features(1))
-        self.network[0][35].register_forward_hook(self.get_features(0))
+        self.network[6].rep[4].register_forward_hook(self.get_features(3))
+        self.network[7].rep[5].register_forward_hook(self.get_features(2))
+        self.network[8].rep[5].register_forward_hook(self.get_features(1))
+        self.network[17].rep[5].register_forward_hook(self.get_features(0))
 
         self.relu = nn.ReLU()
 
-        self.conv1_1 = nn.Conv2d(1024, 256, kernel_size=3, padding="same")
+        self.conv1_1 = nn.Conv2d(3072, 256, kernel_size=3, padding="same")
         self.bn1_1 = nn.BatchNorm2d(256)
         self.conv1_2 = nn.Conv2d(256, 256, kernel_size=3, padding="same")
         self.bn1_2 = nn.BatchNorm2d(256)
 
-        self.conv2_1 = nn.Conv2d(768, 128, kernel_size=3, padding="same")
+        self.conv2_1 = nn.Conv2d(984, 128, kernel_size=3, padding="same")
         self.bn2_1 = nn.BatchNorm2d(128)
         self.conv2_2 = nn.Conv2d(128, 128, kernel_size=3, padding="same")
         self.bn2_2 = nn.BatchNorm2d(128)
@@ -45,7 +45,7 @@ class VGG19UNet(nn.Module):
 
         self.conv5 = nn.Conv2d(32, 1, kernel_size=1, padding="same")
 
-    def forward(self, tensor):
+    def forward(self, tensor: torch.Tensor) -> torch.Tensor:
 
         tensor = self.network(tensor)
 
@@ -69,7 +69,7 @@ class VGG19UNet(nn.Module):
         tensor = self.bn2_2(tensor)
         tensor = self.relu(tensor)
 
-        tensor = F.interpolate(tensor, size=(64, 64))
+        tensor = F.interpolate(tensor, size=(63, 63))
         tensor = torch.cat([tensor, self.features[2]], dim=1)
 
         tensor = self.conv3_1(tensor)
@@ -79,7 +79,7 @@ class VGG19UNet(nn.Module):
         tensor = self.bn3_2(tensor)
         tensor = self.relu(tensor)
 
-        tensor = F.interpolate(tensor, size=(128, 128))
+        tensor = F.interpolate(tensor, size=(125, 125))
         tensor = torch.cat([tensor, self.features[3]], dim=1)
 
         tensor = self.conv4_1(tensor)
@@ -104,7 +104,7 @@ class VGG19UNet(nn.Module):
 if __name__ == "__main__":
     input_size = (4, 1, 256, 256)
     input = torch.rand(input_size)
-    model = VGG19UNet(device="cpu")
+    model = XceptionUNet(device="cpu")
 
     print(model)
 

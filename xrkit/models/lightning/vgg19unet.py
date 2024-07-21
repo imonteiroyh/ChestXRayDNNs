@@ -3,9 +3,8 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 import pytorch_lightning as L
 import torch
 
-from xrkit.models.lightning.base import AutoEncoder, BaseModel
-from xrkit.models.unet import UNet
-from xrkit.models.vgg19 import VGG19
+from xrkit.models.lightning.base import BaseModel
+from xrkit.models.vgg19 import VGG19UNet
 from xrkit.segmentation import (
     DiceBCELoss,
     average_surface_distance,
@@ -18,16 +17,14 @@ from xrkit.segmentation import (
 
 
 class VGG19UNetModel(L.LightningModule, BaseModel):
-    def __init__(self, n_epochs: int) -> None:
+    def __init__(self, n_epochs: int, **kwargs) -> None:
         super().__init__()
 
-        encoder = VGG19()
-        decoder = UNet()
-        network = AutoEncoder(encoder=encoder, decoder=decoder)
+        network = VGG19UNet(n_inputs=1, **kwargs)
         criterion = DiceBCELoss()
         metrics: Iterable[Tuple[Callable, Dict[str, Any]]] = (
             (dice, {}),
-            (jaccard_index, {"average": "macro"}),
+            (jaccard_index, {}),
             (balanced_average_hausdorff_distance, {}),
             (average_surface_distance, {}),
         )
@@ -44,3 +41,10 @@ class VGG19UNetModel(L.LightningModule, BaseModel):
             optimizer=optimizer,
             scheduler=scheduler,
         )
+
+
+if __name__ == "__main__":
+    input = torch.rand((4, 1, 256, 256))
+
+    model = VGG19UNetModel(n_epochs=1, device="cpu").network
+    print(model(input).shape)
