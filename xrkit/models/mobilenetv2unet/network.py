@@ -14,12 +14,12 @@ class MobileNetV2UNet(nn.Module):
 
         self.network = models.mobilenet_v2()
         self.network.features[0][0] = nn.Conv2d(n_inputs, 32, kernel_size=7, stride=2, padding=3, bias=False)
-        self.network = nn.Sequential(*list(self.network.children()))[:-1]
 
-        self.network[0][2].conv[0].register_forward_hook(self.get_features(3))
-        self.network[0][4].conv[0].register_forward_hook(self.get_features(2))
-        self.network[0][7].conv[0].register_forward_hook(self.get_features(1))
-        self.network[0][14].conv[0].register_forward_hook(self.get_features(0))
+        self.network.features[2].conv[0].register_forward_hook(self.get_features(4))
+        self.network.features[4].conv[0].register_forward_hook(self.get_features(3))
+        self.network.features[7].conv[0].register_forward_hook(self.get_features(2))
+        self.network.features[14].conv[0].register_forward_hook(self.get_features(1))
+        self.network.features.register_forward_hook(self.get_features(0))
 
         self.relu = nn.ReLU()
 
@@ -46,11 +46,12 @@ class MobileNetV2UNet(nn.Module):
         self.conv5 = nn.Conv2d(32, 1, kernel_size=1, padding="same")
 
     def forward(self, tensor):
+        self.network(tensor)
 
-        tensor = self.network(tensor)
+        tensor = self.features[0]
 
         tensor = F.interpolate(tensor, size=(16, 16))
-        tensor = torch.cat([tensor, self.features[0]], dim=1)
+        tensor = torch.cat([tensor, self.features[1]], dim=1)
 
         tensor = self.conv1_1(tensor)
         tensor = self.bn1_1(tensor)
@@ -60,7 +61,7 @@ class MobileNetV2UNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(32, 32))
-        tensor = torch.cat([tensor, self.features[1]], dim=1)
+        tensor = torch.cat([tensor, self.features[2]], dim=1)
 
         tensor = self.conv2_1(tensor)
         tensor = self.bn2_1(tensor)
@@ -70,7 +71,7 @@ class MobileNetV2UNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(64, 64))
-        tensor = torch.cat([tensor, self.features[2]], dim=1)
+        tensor = torch.cat([tensor, self.features[3]], dim=1)
 
         tensor = self.conv3_1(tensor)
         tensor = self.bn3_1(tensor)
@@ -80,7 +81,7 @@ class MobileNetV2UNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(128, 128))
-        tensor = torch.cat([tensor, self.features[3]], dim=1)
+        tensor = torch.cat([tensor, self.features[4]], dim=1)
 
         tensor = self.conv4_1(tensor)
         tensor = self.bn4_1(tensor)
