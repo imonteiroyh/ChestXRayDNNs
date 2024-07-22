@@ -14,12 +14,12 @@ class XceptionUNet(nn.Module):
 
         self.network = timm.create_model("legacy_xception")
         self.network.conv1 = nn.Conv2d(n_inputs, 32, kernel_size=3, stride=2, bias=False)
-        self.network = nn.Sequential(*list(self.network.children()))[:-2]
 
-        self.network[6].rep[4].register_forward_hook(self.get_features(3))
-        self.network[7].rep[5].register_forward_hook(self.get_features(2))
-        self.network[8].rep[5].register_forward_hook(self.get_features(1))
-        self.network[17].rep[5].register_forward_hook(self.get_features(0))
+        self.network.block1.rep[4].register_forward_hook(self.get_features(4))
+        self.network.block2.rep[5].register_forward_hook(self.get_features(3))
+        self.network.block3.rep[5].register_forward_hook(self.get_features(2))
+        self.network.block12.rep[5].register_forward_hook(self.get_features(1))
+        self.network.act4.register_forward_hook(self.get_features(0))
 
         self.relu = nn.ReLU()
 
@@ -46,11 +46,12 @@ class XceptionUNet(nn.Module):
         self.conv5 = nn.Conv2d(32, 1, kernel_size=1, padding="same")
 
     def forward(self, tensor: torch.Tensor) -> torch.Tensor:
+        self.network(tensor)
 
-        tensor = self.network(tensor)
+        tensor = self.features[0]
 
         tensor = F.interpolate(tensor, size=(16, 16))
-        tensor = torch.cat([tensor, self.features[0]], dim=1)
+        tensor = torch.cat([tensor, self.features[1]], dim=1)
 
         tensor = self.conv1_1(tensor)
         tensor = self.bn1_1(tensor)
@@ -60,7 +61,7 @@ class XceptionUNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(32, 32))
-        tensor = torch.cat([tensor, self.features[1]], dim=1)
+        tensor = torch.cat([tensor, self.features[2]], dim=1)
 
         tensor = self.conv2_1(tensor)
         tensor = self.bn2_1(tensor)
@@ -70,7 +71,7 @@ class XceptionUNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(63, 63))
-        tensor = torch.cat([tensor, self.features[2]], dim=1)
+        tensor = torch.cat([tensor, self.features[3]], dim=1)
 
         tensor = self.conv3_1(tensor)
         tensor = self.bn3_1(tensor)
@@ -80,7 +81,7 @@ class XceptionUNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(125, 125))
-        tensor = torch.cat([tensor, self.features[3]], dim=1)
+        tensor = torch.cat([tensor, self.features[4]], dim=1)
 
         tensor = self.conv4_1(tensor)
         tensor = self.bn4_1(tensor)
