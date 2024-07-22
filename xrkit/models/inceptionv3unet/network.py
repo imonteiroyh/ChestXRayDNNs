@@ -14,12 +14,12 @@ class InceptionV3UNet(nn.Module):
 
         self.network = timm.create_model("inception_v3")
         self.network.Conv2d_1a_3x3.conv = nn.Conv2d(n_inputs, 32, kernel_size=3, stride=2, bias=False)
-        self.network = nn.Sequential(*list(self.network.children()))[:-3]
 
-        self.network[2].register_forward_hook(self.get_features(3))
-        self.network[5].register_forward_hook(self.get_features(2))
-        self.network[10].branch3x3dbl_2.register_forward_hook(self.get_features(1))
-        self.network[15].branch7x7x3_3.register_forward_hook(self.get_features(0))
+        self.network.Conv2d_2b_3x3.register_forward_hook(self.get_features(4))
+        self.network.Conv2d_4a_3x3.register_forward_hook(self.get_features(3))
+        self.network.Mixed_6a.branch3x3dbl_2.register_forward_hook(self.get_features(2))
+        self.network.Mixed_7a.branch7x7x3_3.register_forward_hook(self.get_features(1))
+        self.network.Mixed_7c.register_forward_hook(self.get_features(0))
 
         self.relu = nn.ReLU()
 
@@ -46,11 +46,12 @@ class InceptionV3UNet(nn.Module):
         self.conv5 = nn.Conv2d(32, 1, kernel_size=1, padding="same")
 
     def forward(self, tensor: torch.Tensor) -> torch.Tensor:
+        self.network(tensor)
 
-        tensor = self.network(tensor)
+        tensor = self.features[0]
 
         tensor = F.interpolate(tensor, size=(14, 14))
-        tensor = torch.cat([tensor, self.features[0]], dim=1)
+        tensor = torch.cat([tensor, self.features[1]], dim=1)
 
         tensor = self.conv1_1(tensor)
         tensor = self.bn1_1(tensor)
@@ -60,7 +61,7 @@ class InceptionV3UNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(29, 29))
-        tensor = torch.cat([tensor, self.features[1]], dim=1)
+        tensor = torch.cat([tensor, self.features[2]], dim=1)
 
         tensor = self.conv2_1(tensor)
         tensor = self.bn2_1(tensor)
@@ -70,7 +71,7 @@ class InceptionV3UNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(60, 60))
-        tensor = torch.cat([tensor, self.features[2]], dim=1)
+        tensor = torch.cat([tensor, self.features[3]], dim=1)
 
         tensor = self.conv3_1(tensor)
         tensor = self.bn3_1(tensor)
@@ -80,7 +81,7 @@ class InceptionV3UNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(125, 125))
-        tensor = torch.cat([tensor, self.features[3]], dim=1)
+        tensor = torch.cat([tensor, self.features[4]], dim=1)
 
         tensor = self.conv4_1(tensor)
         tensor = self.bn4_1(tensor)
