@@ -14,12 +14,12 @@ class VGG19UNet(nn.Module):
 
         self.network = models.vgg19()
         self.network.features[0] = nn.Conv2d(n_inputs, 64, kernel_size=3, stride=1, padding=1)
-        self.network = nn.Sequential(*list(self.network.children()))[:-2]
 
-        self.network[0][8].register_forward_hook(self.get_features(3))
-        self.network[0][17].register_forward_hook(self.get_features(2))
-        self.network[0][26].register_forward_hook(self.get_features(1))
-        self.network[0][35].register_forward_hook(self.get_features(0))
+        self.network.features[8].register_forward_hook(self.get_features(4))
+        self.network.features[17].register_forward_hook(self.get_features(3))
+        self.network.features[26].register_forward_hook(self.get_features(2))
+        self.network.features[35].register_forward_hook(self.get_features(1))
+        self.network.features.register_forward_hook(self.get_features(0))
 
         self.relu = nn.ReLU()
 
@@ -46,11 +46,12 @@ class VGG19UNet(nn.Module):
         self.conv5 = nn.Conv2d(32, 1, kernel_size=1, padding="same")
 
     def forward(self, tensor):
+        self.network(tensor)
 
-        tensor = self.network(tensor)
+        tensor = self.features[0]
 
         tensor = F.interpolate(tensor, size=(16, 16))
-        tensor = torch.cat([tensor, self.features[0]], dim=1)
+        tensor = torch.cat([tensor, self.features[1]], dim=1)
 
         tensor = self.conv1_1(tensor)
         tensor = self.bn1_1(tensor)
@@ -60,7 +61,7 @@ class VGG19UNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(32, 32))
-        tensor = torch.cat([tensor, self.features[1]], dim=1)
+        tensor = torch.cat([tensor, self.features[2]], dim=1)
 
         tensor = self.conv2_1(tensor)
         tensor = self.bn2_1(tensor)
@@ -70,7 +71,7 @@ class VGG19UNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(64, 64))
-        tensor = torch.cat([tensor, self.features[2]], dim=1)
+        tensor = torch.cat([tensor, self.features[3]], dim=1)
 
         tensor = self.conv3_1(tensor)
         tensor = self.bn3_1(tensor)
@@ -80,7 +81,7 @@ class VGG19UNet(nn.Module):
         tensor = self.relu(tensor)
 
         tensor = F.interpolate(tensor, size=(128, 128))
-        tensor = torch.cat([tensor, self.features[3]], dim=1)
+        tensor = torch.cat([tensor, self.features[4]], dim=1)
 
         tensor = self.conv4_1(tensor)
         tensor = self.bn4_1(tensor)

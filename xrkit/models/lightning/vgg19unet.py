@@ -4,7 +4,7 @@ import pytorch_lightning as L
 import torch
 
 from xrkit.models.lightning.base import BaseModel
-from xrkit.models.vgg19 import VGG19UNet
+from xrkit.models.vgg19unet import VGG19UNet
 from xrkit.segmentation import (
     DiceBCELoss,
     average_surface_distance,
