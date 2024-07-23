@@ -4,7 +4,7 @@ import pytorch_lightning as L
 import torch
 
 from xrkit.models.lightning.base import AutoEncoder, BaseModel
-from xrkit.models.nasnetlarge import NASNetLarge
+from xrkit.models.nasnetlargeunet import NASNetLargeUNet
 from xrkit.models.unet import UNet
 from xrkit.segmentation import (
     DiceBCELoss,
@@ -21,7 +21,7 @@ class NASNetLargeUNetModel(L.LightningModule, BaseModel):
     def __init__(self, n_epochs: int) -> None:
         super().__init__()
 
-        encoder = NASNetLarge()
+        encoder = NASNetLargeUNet()
         decoder = UNet()
         network = AutoEncoder(encoder=encoder, decoder=decoder)
         criterion = DiceBCELoss()
