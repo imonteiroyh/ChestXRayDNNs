@@ -4,8 +4,7 @@ import pytorch_lightning as L
 import torch
 
 from xrkit.models.densenet201unet import DenseNet201UNet
-from xrkit.models.lightning.base import AutoEncoder, BaseModel
-from xrkit.models.unet import UNet
+from xrkit.models.lightning.base import BaseModel
 from xrkit.segmentation import (
     DiceBCELoss,
     average_surface_distance,
@@ -18,16 +17,14 @@ from xrkit.segmentation import (
 
 
 class DenseNet201UNetModel(L.LightningModule, BaseModel):
-    def __init__(self, n_epochs: int) -> None:
+    def __init__(self, n_epochs: int, **kwargs) -> None:
         super().__init__()
 
-        encoder = DenseNet201UNet()
-        decoder = UNet()
-        network = AutoEncoder(encoder=encoder, decoder=decoder)
+        network = DenseNet201UNet(n_inputs=1, **kwargs)
         criterion = DiceBCELoss()
         metrics: Iterable[Tuple[Callable, Dict[str, Any]]] = (
             (dice, {}),
-            (jaccard_index, {"average": "macro"}),
+            (jaccard_index, {}),
             (balanced_average_hausdorff_distance, {}),
             (average_surface_distance, {}),
         )
@@ -44,3 +41,10 @@ class DenseNet201UNetModel(L.LightningModule, BaseModel):
             optimizer=optimizer,
             scheduler=scheduler,
         )
+
+
+if __name__ == "__main__":
+    input = torch.rand((4, 1, 256, 256))
+
+    model = DenseNet201UNetModel(n_epochs=1, device="cpu").network
+    print(model(input).shape)

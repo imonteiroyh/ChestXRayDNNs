@@ -13,7 +13,7 @@ from xrkit.base import CONFIG
 # mypy: disable-error-code="valid-type, arg-type"
 
 
-class RSUASegmentationDataset(Dataset):
+class RSUADataset(Dataset):
     def __init__(self, data_subset: str) -> None:
         """
         Initialize the SegmentationDataset.
@@ -88,5 +88,5 @@ class RSUASegmentationDataset(Dataset):
 
 
 if __name__ == "__main__":
-    dataset = RSUASegmentationDataset(data_subset="test")
+    dataset = RSUADataset(data_subset="test")
     dataset.__getitem__(0)

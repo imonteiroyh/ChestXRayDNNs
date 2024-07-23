@@ -3,9 +3,8 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 import pytorch_lightning as L
 import torch
 
-from xrkit.models.lightning.base import AutoEncoder, BaseModel
+from xrkit.models.lightning.base import BaseModel
 from xrkit.models.resnet152unet import ResNet152UNet
-from xrkit.models.unet import UNet
 from xrkit.segmentation import (
     DiceBCELoss,
     average_surface_distance,
@@ -17,17 +16,15 @@ from xrkit.segmentation import (
 # mypy: disable-error-code="misc"
 
 
-class ResNet152V2UNetModel(L.LightningModule, BaseModel):
-    def __init__(self, n_epochs: int) -> None:
+class ResNet152UNetModel(L.LightningModule, BaseModel):
+    def __init__(self, n_epochs: int, **kwargs) -> None:
         super().__init__()
 
-        encoder = ResNet152UNet()
-        decoder = UNet()
-        network = AutoEncoder(encoder=encoder, decoder=decoder)
+        network = ResNet152UNet(n_inputs=1, **kwargs)
         criterion = DiceBCELoss()
         metrics: Iterable[Tuple[Callable, Dict[str, Any]]] = (
             (dice, {}),
-            (jaccard_index, {"average": "macro"}),
+            (jaccard_index, {}),
             (balanced_average_hausdorff_distance, {}),
             (average_surface_distance, {}),
         )
@@ -44,3 +41,10 @@ class ResNet152V2UNetModel(L.LightningModule, BaseModel):
             optimizer=optimizer,
             scheduler=scheduler,
         )
+
+
+if __name__ == "__main__":
+    input = torch.rand((4, 1, 256, 256))
+
+    model = ResNet152UNetModel(n_epochs=1, device="cpu").network
+    print(model(input).shape)
