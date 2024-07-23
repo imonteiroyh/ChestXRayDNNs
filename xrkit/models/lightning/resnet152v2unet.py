@@ -4,7 +4,7 @@ import pytorch_lightning as L
 import torch
 
 from xrkit.models.lightning.base import AutoEncoder, BaseModel
-from xrkit.models.resnet152v2 import ResNet152V2
+from xrkit.models.resnet152unet import ResNet152UNet
 from xrkit.models.unet import UNet
 from xrkit.segmentation import (
     DiceBCELoss,
@@ -21,7 +21,7 @@ class ResNet152V2UNetModel(L.LightningModule, BaseModel):
     def __init__(self, n_epochs: int) -> None:
         super().__init__()
 
-        encoder = ResNet152V2()
+        encoder = ResNet152UNet()
         decoder = UNet()
         network = AutoEncoder(encoder=encoder, decoder=decoder)
         criterion = DiceBCELoss()
