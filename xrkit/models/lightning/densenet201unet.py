@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, Iterable, Tuple
 import pytorch_lightning as L
 import torch
 
-from xrkit.models.densenet import DenseNet201
+from xrkit.models.densenet201unet import DenseNet201UNet
 from xrkit.models.lightning.base import AutoEncoder, BaseModel
 from xrkit.models.unet import UNet
 from xrkit.segmentation import (
@@ -21,7 +21,7 @@ class DenseNet201UNetModel(L.LightningModule, BaseModel):
     def __init__(self, n_epochs: int) -> None:
         super().__init__()
 
-        encoder = DenseNet201()
+        encoder = DenseNet201UNet()
         decoder = UNet()
         network = AutoEncoder(encoder=encoder, decoder=decoder)
         criterion = DiceBCELoss()
