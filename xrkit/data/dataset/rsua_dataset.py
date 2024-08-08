@@ -16,7 +16,7 @@ from xrkit.base import CONFIG
 class RSUADataset(Dataset):
     def __init__(self, data_subset: str) -> None:
         """
-        Initialize the SegmentationDataset.
+        Initialize the RSUADataset.
 
         Parameters:
             data_subset (str):

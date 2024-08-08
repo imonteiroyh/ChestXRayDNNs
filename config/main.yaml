@@ -25,14 +25,15 @@ reports:
   enhancement: reports/enhancement
 
 data:
-  montgomery_segmentation:
-    raw_path: data/raw/MontgomerySet
   rsua_segmentation:
     raw_path: "data/raw/Data Thorax DICOM RSUA (Validated)"
+  nih_classification:
+    raw_path: "data/raw/NIH Chest X-Ray"
+    train_validation_samples: data/raw/NIH Chest X-Ray/train_val_list.txt
+    test_samples: data/raw/NIH Chest X-Ray/test_list.txt 
   raw: 
     path: data/raw
-    train_samples: data/raw/train_val_list.txt
-    test_samples: data/raw/test_list.txt 
-  interim: data/interim/example.csv
+  interim: 
+    path: data/interim
   processed:
     path: data/processed
