@@ -12,7 +12,7 @@ defaults:
 base:
   image_suffix: png
   seed: 34
-  batch_size: 4
+  batch_size: 16
   n_workers: 11
   image_size: 256
 
@@ -31,6 +31,8 @@ data:
     raw_path: "data/raw/NIH Chest X-Ray"
     train_validation_samples: data/raw/NIH Chest X-Ray/train_val_list.txt
     test_samples: data/raw/NIH Chest X-Ray/test_list.txt 
+  chestxray2017_classification:
+    raw_path: "data/raw/chest_xray"
   raw: 
     path: data/raw
   interim: 

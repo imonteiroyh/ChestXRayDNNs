@@ -22,7 +22,22 @@ class NIHDataset(Dataset):
             data_subset (str):
                 Subset of the data to load, either 'train' or 'test'.
         """
-        self.labels = ['Atelectasis', 'Cardiomegaly', 'Consolidation', 'Edema', 'Effusion', 'Emphysema', 'Fibrosis', 'Infiltration', 'Mass', 'Nodule', 'Pleural_Thickening', 'Pneumonia', 'Pneumothorax']
+        self.labels = [
+            "Atelectasis",
+            "Cardiomegaly",
+            "Consolidation",
+            "Edema",
+            "Effusion",
+            "Emphysema",
+            "Fibrosis",
+            "Infiltration",
+            "Hernia",
+            "Mass",
+            "Nodule",
+            "Pleural_Thickening",
+            "Pneumonia",
+            "Pneumothorax",
+        ]
 
         self.data_subset = data_subset
         self.validation_percentage = 0.25
@@ -45,9 +60,13 @@ class NIHDataset(Dataset):
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
         file = self.set[index]
         image_path = list(Path(CONFIG.data.nih_classification.raw_path).rglob(file))[0]
-        image = Image.open(image_path).convert('RGB')
+        image = Image.open(image_path).convert("RGB")
 
-        targets = self.reference_file[self.reference_file['Image Index'] == file].iloc[0][self.labels].values.astype(int)
+        targets = (
+            self.reference_file[self.reference_file["Image Index"] == file]
+            .iloc[0][self.labels]
+            .values.astype(int)
+        )
 
         image = self.transform(image).float()
         targets = torch.from_numpy(targets).float()
@@ -55,18 +74,20 @@ class NIHDataset(Dataset):
         return image, targets
 
     def preprocess_targets(self):
-        self.reference_file = pd.read_csv(Path(CONFIG.data.nih_classification.raw_path, "Data_Entry_2017.csv"))
+        self.reference_file = pd.read_csv(
+            Path(CONFIG.data.nih_classification.raw_path, "Data_Entry_2017.csv")
+        )
 
         # Removing labels with less than 1000 samples (only Hernia)
-        self.reference_file = self.reference_file[self.reference_file['Finding Labels'].str.count('Hernia') == 0]
+        # self.reference_file = self.reference_file[self.reference_file['Finding Labels'].str.count('Hernia') == 0]
 
         labels = []
         for _, file in self.reference_file.iterrows():
             current_labels = {}
-            current_labels['Image Index'] = file['Image Index']
+            current_labels["Image Index"] = file["Image Index"]
 
             for label in self.labels:
-                current_labels[label] = 1 if label in file['Finding Labels'] else 0
+                current_labels[label] = 1 if label in file["Finding Labels"] else 0
 
             labels.append(current_labels)
 
@@ -78,19 +99,33 @@ class NIHDataset(Dataset):
     def split_data(self) -> pd.DataFrame:
         """Splits the dataset into training and testing subsets."""
 
-        with open(CONFIG.data.nih_classification.test_samples, 'r') as file:
-            test_samples = file.read().split('\n')
-        test_samples = self.reference_file[self.reference_file['Image Index'].isin(test_samples)]['Image Index'].values.tolist()
-        
-        with open(CONFIG.data.nih_classification.train_validation_samples, 'r') as file:
-            train_validation_samples = file.read().split('\n')
-        train_validation_samples = self.reference_file[self.reference_file['Image Index'].isin(train_validation_samples)]['Image Index'].values.tolist()
-        
-        # 25% patients, 20% data to validation
-        validation_patients = pd.Series(self.reference_file[~self.reference_file['Image Index'].isin(test_samples)]['Patient ID'].unique()).sample(frac=self.validation_percentage, random_state=CONFIG.base.seed).values
-        validation_samples = self.reference_file[self.reference_file['Patient ID'].isin(validation_patients)]['Image Index'].values.tolist()
-        train_samples = list(set(train_validation_samples) - set(validation_samples))
+        with open(CONFIG.data.nih_classification.test_samples, "r") as file:
+            test_samples = file.read().split("\n")
+        test_samples = self.reference_file[self.reference_file["Image Index"].isin(test_samples)][
+            "Image Index"
+        ].values.tolist()
 
+        with open(CONFIG.data.nih_classification.train_validation_samples, "r") as file:
+            train_validation_samples = file.read().split("\n")
+        train_validation_samples = self.reference_file[
+            self.reference_file["Image Index"].isin(train_validation_samples)
+        ]["Image Index"].values.tolist()
+
+        # 25% patients, 20% data to validation
+        validation_patients = (
+            pd.Series(
+                self.reference_file[~self.reference_file["Image Index"].isin(test_samples)][
+                    "Patient ID"
+                ].unique()
+            )
+            .sample(frac=self.validation_percentage, random_state=CONFIG.base.seed)
+            .values
+        )
+        validation_samples = self.reference_file[self.reference_file["Patient ID"].isin(validation_patients)][
+            "Image Index"
+        ].values.tolist()
+        train_samples = list(set(train_validation_samples) - set(validation_samples))
+        breakpoint()
         data_mapping = {
             "train": train_samples,
             "validation": validation_samples,
